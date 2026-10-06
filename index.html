@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSAA-TRACK Admin Panel</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&family=Lato:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@700;800;900&family=Poppins:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Entrance pre-boot: the page body is a light slate, so without this the
+         browser would paint a light screen for the ~100ms before React mounts
+         and the navy entrance appears. It is only added when the entrance is
+         going to play — i.e. NOT on a page reload (same rule as
+         src/components/entrance/useEntranceGate.js, 'visit' policy) — so a
+         reload doesn't flash navy. OSAAEntrance removes the class once it has
+         decided. -->
+    <style>
+      html.osaa-preboot,
+      html.osaa-preboot body {
+        background-color: #0b1640;
+      }
+    </style>
+    <script>
+      (function () {
+        var reload = false;
+        try {
+          var nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+          reload = nav && nav.type ? nav.type === "reload" : !!(performance.navigation && performance.navigation.type === 1);
+        } catch (e) {}
+        if (!reload) document.documentElement.classList.add("osaa-preboot");
+        // Safety net: never leave the page navy if the entrance is ever removed.
+        setTimeout(function () {
+          document.documentElement.classList.remove("osaa-preboot");
+        }, 9000);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

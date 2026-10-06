@@ -1,0 +1,121 @@
+/* ------------------------------------------------------------------ *
+ * OSAA-TRACK entrance layer
+ *
+ * The overlay paints its own navy gradient, so the very first frame of the
+ * page is already the environment from Phase 1. Nothing here ever shows
+ * white, and the WebGL canvas sits on top of the gradient with a transparent
+ * clear colour — which is why there is no flash when the canvas mounts.
+ * ------------------------------------------------------------------ */
+
+.osaa-entrance {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482000;
+  overflow: hidden;
+  opacity: 1;
+  transform-origin: 50% 46%;
+  will-change: opacity, transform;
+  /* Mirrors environment.backgroundCss; OSAAEntrance overrides it inline from
+     the config, this is the value used before that lands. */
+  background: radial-gradient(
+    125% 95% at 50% 43%,
+    #24357e 0%,
+    #1b2a6b 34%,
+    #111d4e 62%,
+    #0b1640 84%,
+    #070e2a 100%
+  );
+  /* stops iOS from bouncing the page behind the overlay */
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.osaa-entrance__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Vignette: pulls the eye to the centre of frame. */
+.osaa-entrance__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    110% 85% at 50% 46%,
+    rgba(0, 0, 0, 0) 38%,
+    rgba(4, 9, 28, var(--osaa-vignette-mid, 0.24)) 76%,
+    rgba(4, 9, 28, var(--osaa-vignette-edge, 0.58)) 100%
+  );
+}
+
+/* Film grain: one static noise tile, nudged around on the compositor only. */
+.osaa-entrance__grain {
+  position: absolute;
+  inset: -80px;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  will-change: transform;
+  animation: osaa-grain 0.8s steps(1) infinite;
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'>\
+<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter>\
+<rect width='160' height='160' filter='url(%23n)'/></svg>");
+}
+
+@keyframes osaa-grain {
+  0%   { transform: translate3d(0, 0, 0); }
+  25%  { transform: translate3d(-18px, 10px, 0); }
+  50%  { transform: translate3d(12px, -16px, 0); }
+  75%  { transform: translate3d(-8px, -6px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* ------------------------------------------------------------------ *
+ * Reduced-motion / no-WebGL layer
+ * ------------------------------------------------------------------ */
+.osaa-entrance__quiet {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.osaa-entrance__quiet-seal {
+  width: min(46vw, 46vh, 360px);
+  height: auto;
+  opacity: 0;
+  filter: drop-shadow(0 18px 44px rgba(3, 7, 22, 0.75));
+  animation-name: osaa-quiet-in;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+@keyframes osaa-quiet-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Host page
+ * ------------------------------------------------------------------ */
+.osaa-entrance-app {
+  /* No box of its own, so the existing OSAA-TRACK layout is untouched. */
+  display: contents;
+}
+
+html.osaa-entrance-active,
+html.osaa-entrance-active body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: #0b1640;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .osaa-entrance__grain {
+    animation: none;
+  }
+}
